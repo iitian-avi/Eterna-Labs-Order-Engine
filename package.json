@@ -1,0 +1,36 @@
+{
+  "name": "order-execution-engine",
+  "version": "1.0.0",
+  "description": "Order Execution Engine for matching buy and sell orders",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest"
+  },
+  "keywords": [
+    "order",
+    "execution",
+    "matching",
+    "trading"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/node": "^20.4.2",
+    "@types/uuid": "^9.0.2",
+    "@types/cors": "^2.8.13",
+    "@types/jest": "^29.5.3",
+    "typescript": "^5.1.6",
+    "ts-node-dev": "^2.0.0",
+    "jest": "^29.6.1",
+    "ts-jest": "^29.1.1"
+  }
+}
