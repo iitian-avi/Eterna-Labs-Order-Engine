@@ -5,7 +5,8 @@ import routes from './routes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app: Express = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10);
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Middleware
 app.use(cors());
@@ -33,12 +34,12 @@ app.get('/', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║   Order Execution Engine                              ║
-║   Server running on http://localhost:${PORT}         ║
-║   Dashboard: http://localhost:${PORT}                ║
+║   Server running on http://${HOST}:${PORT}           ║
+║   Environment: ${process.env.NODE_ENV || 'development'}
 ╚═══════════════════════════════════════════════════════╝
   `);
   console.log('Available endpoints:');
