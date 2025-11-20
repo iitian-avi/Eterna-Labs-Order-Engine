@@ -263,12 +263,49 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
             .dashboard {
                 grid-template-columns: 1fr;
             }
             
             .button-group {
                 grid-template-columns: 1fr;
+            }
+
+            .panel {
+                padding: 15px;
+            }
+
+            .panel h2 {
+                font-size: 1.2rem;
+            }
+
+            input, select, button {
+                font-size: 0.9rem;
+            }
+
+            .orderbook-table {
+                font-size: 0.85rem;
+            }
+
+            .orderbook-table th, .orderbook-table td {
+                padding: 6px 4px;
+            }
+
+            .response-box {
+                font-size: 0.8rem;
+                max-height: 200px;
             }
         }
     </style>
@@ -280,7 +317,7 @@
             <p>Real-time Order Matching & Trading Platform</p>
             <p style="margin-top: 10px;">
                 <span class="status-indicator status-online"></span>
-                <span id="status">Connected to localhost:3000</span>
+                <span id="status">Connected</span>
             </p>
         </div>
 
@@ -351,7 +388,8 @@
     </div>
 
     <script>
-        const API_BASE = 'http://localhost:3000/api';
+        // Automatically detect the correct API URL (works for localhost and deployed)
+        const API_BASE = window.location.origin + '/api';
 
         async function createOrder(side) {
             const symbol = document.getElementById('symbol').value.toUpperCase();
