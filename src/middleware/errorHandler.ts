@@ -38,7 +38,7 @@ export const errorHandler = (
   }
 
   // Handle validation errors
-  if (err.message.includes('Invalid')) {
+  if (err.message.includes('Invalid') || err.message.includes('Insufficient')) {
     const response: ApiResponse = {
       success: false,
       error: {

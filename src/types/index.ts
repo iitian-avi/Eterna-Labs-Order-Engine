@@ -21,6 +21,7 @@ export interface Order {
   filledQuantity: number;
   status: OrderStatus;
   timestamp: number;
+  userId?: string; // Optional: for position tracking
 }
 
 export interface Trade {
@@ -51,6 +52,7 @@ export interface CreateOrderRequest {
   side: OrderSide;
   price: number;
   quantity: number;
+  userId?: string; // Optional: for position tracking
 }
 
 export interface CreateOrderResponse {

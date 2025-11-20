@@ -1,12 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Order, OrderSide, OrderStatus, CreateOrderRequest, CreateOrderResponse, OrderBook as OrderBookType } from '../types';
 import { MatchingEngine } from '../engine/MatchingEngine';
+import { PositionManager } from './PositionManager';
 
 export class OrderBookManager {
   private matchingEngine: MatchingEngine;
+  private positionManager: PositionManager;
+  private enforcePositions: boolean;
 
-  constructor() {
+  constructor(enforcePositions: boolean = false) {
     this.matchingEngine = new MatchingEngine();
+    this.positionManager = new PositionManager();
+    this.enforcePositions = enforcePositions;
+    
+    // For demo: Give initial positions to default user
+    if (enforcePositions) {
+      this.positionManager.giveInitialBalance('default', 'AAPL', 1000);
+      this.positionManager.giveInitialBalance('default', 'TSLA', 1000);
+      this.positionManager.giveInitialBalance('default', 'GOOGL', 1000);
+    }
   }
 
   /**
@@ -15,6 +27,16 @@ export class OrderBookManager {
   public createOrder(request: CreateOrderRequest): CreateOrderResponse {
     // Validate order
     this.validateOrder(request);
+
+    const userId = request.userId || 'default';
+
+    // Check position if enforcement is enabled
+    if (this.enforcePositions && request.side === OrderSide.SELL) {
+      const position = this.positionManager.getPosition(userId, request.symbol.toUpperCase());
+      if (position < request.quantity) {
+        throw new Error(`Insufficient position. You have ${position} ${request.symbol}, but trying to sell ${request.quantity}`);
+      }
+    }
 
     // Create order
     const order: Order = {
@@ -25,11 +47,30 @@ export class OrderBookManager {
       quantity: request.quantity,
       filledQuantity: 0,
       status: OrderStatus.PENDING,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      userId
     };
 
     // Submit to matching engine
     const trades = this.matchingEngine.submitOrder(order);
+
+    // Update positions if enforcement is enabled
+    if (this.enforcePositions) {
+      if (order.side === OrderSide.BUY) {
+        // For BUY: Increase position by filled amount
+        if (order.filledQuantity > 0) {
+          this.positionManager.updatePosition(userId, order.symbol, order.filledQuantity, true);
+        }
+      } else {
+        // For SELL: Decrease position immediately (even if pending)
+        // This prevents double-selling the same shares
+        const quantityToSell = order.quantity; // Reserve the full quantity
+        this.positionManager.updatePosition(userId, order.symbol, quantityToSell, false);
+        
+        // If order was partially filled or cancelled, we'd need to add back unfilled quantity
+        // For this demo, we keep it simple
+      }
+    }
 
     return {
       order,
@@ -77,6 +118,20 @@ export class OrderBookManager {
    */
   public cancelOrder(orderId: string): boolean {
     return this.matchingEngine.cancelOrder(orderId);
+  }
+
+  /**
+   * Get user positions (if position tracking is enabled)
+   */
+  public getUserPositions(userId: string = 'default') {
+    if (!this.enforcePositions) {
+      return { message: 'Position tracking is disabled', positions: [] };
+    }
+    return {
+      userId,
+      positions: this.positionManager.getUserPositions(userId),
+      enforcePositions: this.enforcePositions
+    };
   }
 
   /**

@@ -4,7 +4,8 @@ import { asyncHandler, ApiResponse, ApiError } from '../middleware/errorHandler'
 import { CreateOrderRequest, OrderSide } from '../types';
 
 const router = Router();
-const orderBookManager = new OrderBookManager();
+// Enable position tracking to prevent selling more than owned
+const orderBookManager = new OrderBookManager(true);
 
 /**
  * POST /api/orders
@@ -133,6 +134,22 @@ router.get('/trades', asyncHandler(async (req: Request, res: Response) => {
       trades,
       count: trades.length
     }
+  };
+
+  res.json(response);
+}));
+
+/**
+ * GET /api/positions
+ * Get user positions (requires position tracking to be enabled)
+ */
+router.get('/positions', asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req.query.userId as string) || 'default';
+  const positions = orderBookManager.getUserPositions(userId);
+
+  const response: ApiResponse = {
+    success: true,
+    data: positions
   };
 
   res.json(response);
